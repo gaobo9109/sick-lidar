@@ -124,7 +124,7 @@ public:
      * @param port The port of the remote Sick LDMRS sensor.
      * @param recording If \c true, data is recorded into dbt + utc files. Data is not recorded otherwise.
      */
-    SickLDMRSSensor(QString name, QString ip, int port);
+    SickLDMRSSensor(QString ip, int port);
 
     /// Destructor
     ~SickLDMRSSensor();
@@ -210,7 +210,6 @@ public:
 
 private:
     /// Name is used to recognize between several sensors and store data into .dbt and utc files.
-    QString name_;
 
     /// The IP address of the remote Sick LDMRS sensor we are connected to.
     QString ipaddr_;

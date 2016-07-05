@@ -93,6 +93,9 @@ public:
     /// Destructor
     ~SickSocket();
 
+    SickFrame * frame;
+
+
 public Q_SLOTS:
     /// Enable the connection to the server
     void connectToServer(QString host, int port);

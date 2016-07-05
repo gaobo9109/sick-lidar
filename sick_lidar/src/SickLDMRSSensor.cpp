@@ -34,8 +34,7 @@ static const int SICKLDMRS_OBJECTDATA_TYPE  = 0x2221;
 
 SickLDMRSSensor::SickLDMRSSensor()
     : ipaddr_("192.168.0.1"),
-      port_(12002),
-      name_("SickLDMRSDefault")
+      port_(12002)
 {
     S_socket = new SickSocket(this);
     connect(S_socket, SIGNAL(configuration()), this, SLOT(configure()) );
@@ -43,10 +42,9 @@ SickLDMRSSensor::SickLDMRSSensor()
     pendingBytes.previousData = false;
 }
 
-SickLDMRSSensor::SickLDMRSSensor(QString name, QString ip, int port)
+SickLDMRSSensor::SickLDMRSSensor(QString ip, int port)
     : ipaddr_(ip),
-      port_(port),
-      name_(name)
+      port_(port)
 {   
     S_socket = new SickSocket(this);
     connect(S_socket, SIGNAL(configuration()), this, SLOT(configure()) );
@@ -280,8 +278,8 @@ unsigned long SickLDMRSSensor::processMessage(MessageLDMRS &msg)
 
         // replace memory with structured data
         for (int i = 0; i < msg.hScan.numPoints; ++i) {
-            scanPoints[i].layerEcho = *((u_char*)(msg.body + index));
-            scanPoints[i].flags = *((u_char*)(msg.body + index + 1));
+            scanPoints[i].layerEcho = *((uint8_t*)(msg.body + index));
+            scanPoints[i].flags = *((uint8_t*)(msg.body + index + 1));
             scanPoints[i].angle = *((uint16_t*)(msg.body + index + 2));
             scanPoints[i].distance = *((uint16_t*)(msg.body + index + 4));
             scanPoints[i].echoPulseWidth = *((uint16_t*)(msg.body + index + 6));
