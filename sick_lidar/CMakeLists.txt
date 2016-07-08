@@ -18,6 +18,7 @@ else()
   message(ERROR "Qt4 needed")
 endif()
 
+find_package(PCL 1.3 REQUIRED COMPONENTS common io)
 
 find_package(catkin REQUIRED COMPONENTS
   message_generation
@@ -43,6 +44,7 @@ catkin_package(
 # ========================================
 add_definitions(
   ${QT_DEFINITIONS}
+  ${PCL_DEFINITIONS}
 )
 
 # ========================================
@@ -52,8 +54,15 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${QT_INCLUDE_DIR}
+  ${PCL_INCLUDE_DIRS}
 )
 
+# ========================================
+# Link directories
+# ========================================
+link_directories(
+  ${PCL_LIBRARY_DIRS}
+)
 
 # ========================================
 # List of sources
@@ -61,23 +70,17 @@ include_directories(
 set(PROJECT_SRCS
   src/SickLDMRSSensor.cpp
   src/SickSocket.cpp
+  src/SickLDMRSROS.cpp
 )
 
-# ========================================
-# Files to MOC
-# ========================================
-set(FILES_TO_MOC
-    include/SickLDMRSSensor.h
-    include/SickSocket.h
-)
 
 
 # ========================================
 # Call MOC
 # ========================================
-qt4_wrap_cpp(
-    PROJECT_MOC_SRCS
-    ${FILES_TO_MOC}
+qt4_wrap_cpp(PROJECT_MOC_SRCS
+    include/SickLDMRSSensor.h
+    include/SickSocket.h
 )
 
 # ========================================
@@ -97,5 +100,7 @@ target_link_libraries(
     ${PROJECT_NAME}
     ${QT_LIBRARIES}
     ${catkin_LIBRARIES}
+    ${PCL_COMMON_LIBRARIES} 
+    ${PCL_IO_LIBRARIES}
 )
 

@@ -13,6 +13,7 @@
 
 #include "SickLDMRSSensor.h"
 #include "SickSocket.h"
+#include "SickLDMRSROS.h"
 #include <ros/ros.h>
 #include <iostream>
 #include <QTcpSocket>
@@ -37,6 +38,7 @@ SickLDMRSSensor::SickLDMRSSensor()
       port_(12002)
 {
     S_socket = new SickSocket(this);
+    rosHandler = new SickLDMRSROS;
     connect(S_socket, SIGNAL(configuration()), this, SLOT(configure()) );
     pendingBytes.time = 0;
     pendingBytes.previousData = false;
@@ -47,6 +49,7 @@ SickLDMRSSensor::SickLDMRSSensor(QString ip, int port)
       port_(port)
 {   
     S_socket = new SickSocket(this);
+    rosHandler = new SickLDMRSROS;
     connect(S_socket, SIGNAL(configuration()), this, SLOT(configure()) );
     pendingBytes.time = 0;
     pendingBytes.previousData = false;
@@ -57,6 +60,7 @@ SickLDMRSSensor::SickLDMRSSensor(QString ip, int port)
 SickLDMRSSensor::~SickLDMRSSensor()
 {
     delete S_socket;
+    delete rosHandler;
 }
 
 
@@ -332,8 +336,7 @@ void SickLDMRSSensor::customEvent(QEvent * e)
 
         if (type == SICKLDMRS_SCANDATA_TYPE)
         {
-//            setState(ComponentBase::MONITOR_OK);
-            // write data on the disk
+            rosHandler->makePointCloud(&msgToProcess);
         }
         else if (type == SICKLDMRS_OBJECTDATA_TYPE)
         {

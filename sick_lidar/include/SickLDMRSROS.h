@@ -1,25 +1,41 @@
-#include <sensor_msgs/PointCloud2.h>
-#include <sensor_msgs/LaserScan.h>
-#include <SickLDMRSSensor.h>
+#ifndef __SICKLDMRS_ROS_H__
+#define __SICKLDMRS_ROS_H__
+
+#include <SickLDMRSData.h>
 #include <ros/ros.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <pcl_ros/point_cloud.h>
+#include <pcl/point_types.h>
+
+typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
+
+#define SICKLDMRS_API
 
 
 namespace pacpus{
 
+class MessageLDMRS;
+
 class SickLDMRSROS
 {
 	public:
-
+		SickLDMRSROS();
+		~SickLDMRSROS();
+		void makePointCloud(MessageLDMRS *message);
 
 	private:
-		int queueSize = 1;
-		ros::NodeHandle nh = getPrivateNodeHandle();
-		ros::Publisher pcl = nh.advertise<sensor_msgs::PointCloud2>("/lidar/cloud",queueSize);
-		ros::Publisher scan0 = nh.advertise<sensor_msg::LaserScan>("/lidar/scan0",queueSize);
-		ros::Publisher scan1 = nh.advertise<sensor_msg::LaserScan>("/lidar/scan1",queueSize);
-		ros::Publisher scan2 = nh.advertise<sensor_msg::LaserScan>("/lidar/scan2",queueSize);
-		ros::Publisher scan3 = nh.advertise<sensor_msg::LaserScan>("/lidar/scan3",queueSize);
+
+		ros::NodeHandle	nh;
+		ros::Publisher pclPub;
+		PointCloud cloud;
+		float vSinLut[4];
+		float vCosLut[4];
+
+		void initLut();
+		void polar2Cartesian(ScanPoint &ptPolar, pcl::PointXYZ &ptXYZ, float radPerTick);
 
 };
 
-} // namespace pacpus
+} // namespace sick_lidar
+
+#endif

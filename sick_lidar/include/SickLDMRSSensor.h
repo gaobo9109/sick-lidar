@@ -25,25 +25,14 @@
 #include <string>
 
 #define BODY_MAX_SIZE   10000
-
-// Export macro for SickLDMRS DLL for Windows only
-#ifdef WIN32
-#   ifdef SICKLDMRS_EXPORTS
-        // make DLL
-#       define SICKLDMRS_API __declspec(dllexport)
-#   else
-        // use DLL
-#       define SICKLDMRS_API __declspec(dllimport)
-#   endif
-#else
-    // On other platforms, simply ignore this 
-#   define SICKLDMRS_API
-#endif
+#define SICKLDMRS_API
 
 class QEvent;
 
+
 namespace pacpus {
-    
+
+class SickLDMRSROS;
 /**
  * \brief Structure used to stored Sick data between several decoding processes
  *
@@ -207,6 +196,7 @@ public:
      * @brief S_socket, used to receive and send data to the remote sensor.
      */
     SickSocket * S_socket;
+    SickLDMRSROS * rosHandler;
 
 private:
     /// Name is used to recognize between several sensors and store data into .dbt and utc files.

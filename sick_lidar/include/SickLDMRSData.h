@@ -17,19 +17,8 @@
 #include "cstdint.h"
 #include "road_time.h"
 
-// Export macro for SickLDMRS DLL for Windows only
-#ifdef WIN32
-#   ifdef SICKLDMRS_EXPORTS
-        // make DLL
-#       define SICKLDMRS_API __declspec(dllexport)
-#   else
-        // use DLL
-#       define SICKLDMRS_API __declspec(dllimport)
-#   endif
-#else
-    // On other platforms, simply ignore this
-#   define SICKLDMRS_API
-#endif
+
+#define SICKLDMRS_API
 
 namespace pacpus{
 
@@ -114,18 +103,6 @@ struct SICKLDMRS_API ScanPoint{
     uint16_t echoPulseWidth;   //!< Width of echo pulse (cm)
     // u_int16_t reserved;
 };
-
-/*!
- * \brief The ScanObject struct (not used)
- *
- * Used to describe an object.
- * Data type 0x2221 @see DataHeader
- */
-struct SICKLDMRS_API ScanObject{
-    // TODO
-};
-
-
 
 
 
