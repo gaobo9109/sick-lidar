@@ -68,8 +68,8 @@ link_directories(
 # List of sources
 # ========================================
 set(PROJECT_SRCS
-  src/SickLDMRSSensor.cpp
   src/SickSocket.cpp
+  src/SickLDMRSSensor.cpp
   src/SickLDMRSROS.cpp
 )
 
@@ -83,11 +83,15 @@ qt4_wrap_cpp(PROJECT_MOC_SRCS
     include/SickSocket.h
 )
 
+add_executable(driver
+    src/SickDriver.cpp
+)
+
 # ========================================
 # Build a library
 # ========================================
 add_library(
-    ${PROJECT_NAME}
+    ${PROJECT_NAME} STATIC
     ${PROJECT_SRCS}
     ${PROJECT_MOC_SRCS}
 )
@@ -96,11 +100,18 @@ add_library(
 # Libraries
 # ========================================
 # All the platform
-target_link_libraries(
-    ${PROJECT_NAME}
+
+target_link_libraries(sick_lidar
     ${QT_LIBRARIES}
     ${catkin_LIBRARIES}
     ${PCL_COMMON_LIBRARIES} 
     ${PCL_IO_LIBRARIES}
+)
+
+
+target_link_libraries(driver
+    ${PROJECT_NAME}
+    ${QT_LIBRARIES}
+    ${catkin_LIBRARIES}
 )
 

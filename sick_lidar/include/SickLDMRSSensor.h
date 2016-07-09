@@ -17,15 +17,12 @@
 #define SICKLDMRSSENSOR_H
 
 
-
-// #include "AbstractSickSensor.h"
 #include "SickLDMRSData.h"
 #include "SickSocket.h"
 #include <QThread>
 #include <string>
 
 #define BODY_MAX_SIZE   10000
-#define SICKLDMRS_API
 
 class QEvent;
 
@@ -56,7 +53,7 @@ struct MessagePacket {
  * (Object data decoding is not implemented yet).
  * Then, the body field is replaced by a ScanPoint or ScanObject array in order to be stored in DBT/UTC files.
  */
-class SICKLDMRS_API MessageLDMRS
+class MessageLDMRS
 {
 public:
     /// Constructor.

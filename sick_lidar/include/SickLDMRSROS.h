@@ -1,7 +1,7 @@
 #ifndef __SICKLDMRS_ROS_H__
 #define __SICKLDMRS_ROS_H__
 
-#include <SickLDMRSData.h>
+
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_ros/point_cloud.h>
@@ -9,12 +9,10 @@
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
-#define SICKLDMRS_API
-
-
 namespace pacpus{
 
 class MessageLDMRS;
+struct ScanPoint;
 
 class SickLDMRSROS
 {

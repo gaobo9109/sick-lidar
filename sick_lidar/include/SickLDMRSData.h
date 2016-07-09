@@ -18,7 +18,6 @@
 #include "road_time.h"
 
 
-#define SICKLDMRS_API
 
 namespace pacpus{
 
@@ -53,7 +52,7 @@ struct DataHeader {
  *
  * see Ethernet data protocol LD-MRS page 5
  */
-struct SICKLDMRS_API ScanHeader {
+struct ScanHeader {
     uint16_t scanNumber;       //!< Number of the scan since the sensor started measuring.
     uint16_t scannerStatus;    //!< Status of the scanner
                                 /**<
@@ -92,7 +91,7 @@ struct SICKLDMRS_API ScanHeader {
  * Used to describe a point.
  * Data type 0x2202 @see DataHeader
  */
-struct SICKLDMRS_API ScanPoint{
+struct ScanPoint{
     uint8_t layerEcho;           //!< 4 LSB : Layer (scan layer of the point)
                                 //!< 4 MSB : Echo
     uint8_t flags;
