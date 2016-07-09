@@ -10,9 +10,6 @@
 //  purpose:    Definition of the SickLDMRSSensor class
 *********************************************************************/
 
-
-
-
 #ifndef SICKLDMRSSENSOR_H
 #define SICKLDMRSSENSOR_H
 
@@ -21,6 +18,7 @@
 #include "SickSocket.h"
 #include <QThread>
 #include <string>
+
 
 #define BODY_MAX_SIZE   10000
 

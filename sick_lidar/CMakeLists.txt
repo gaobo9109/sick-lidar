@@ -71,6 +71,7 @@ set(PROJECT_SRCS
   src/SickSocket.cpp
   src/SickLDMRSSensor.cpp
   src/SickLDMRSROS.cpp
+  src/SickDriver.cpp
 )
 
 
@@ -90,8 +91,7 @@ add_executable(driver
 # ========================================
 # Build a library
 # ========================================
-add_library(
-    ${PROJECT_NAME} STATIC
+add_library(sick_lib
     ${PROJECT_SRCS}
     ${PROJECT_MOC_SRCS}
 )
@@ -101,7 +101,7 @@ add_library(
 # ========================================
 # All the platform
 
-target_link_libraries(sick_lidar
+target_link_libraries(sick_lib
     ${QT_LIBRARIES}
     ${catkin_LIBRARIES}
     ${PCL_COMMON_LIBRARIES} 
@@ -110,7 +110,7 @@ target_link_libraries(sick_lidar
 
 
 target_link_libraries(driver
-    ${PROJECT_NAME}
+    sick_lib
     ${QT_LIBRARIES}
     ${catkin_LIBRARIES}
 )

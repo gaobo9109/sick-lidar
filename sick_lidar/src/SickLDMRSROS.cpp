@@ -16,6 +16,11 @@ SickLDMRSROS::SickLDMRSROS()
 	initLut();
 }
 
+SickLDMRSROS::~SickLDMRSROS()
+{
+	
+}
+
 void SickLDMRSROS::initLut(){
 	for (int i=0; i<4; i++){
 		vSinLut[i] = sin(elevAngle[i]*PI/180);

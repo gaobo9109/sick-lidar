@@ -350,3 +350,4 @@ void SickLDMRSSensor::customEvent(QEvent * e)
 }
 
 } // namespace pacpus
+
