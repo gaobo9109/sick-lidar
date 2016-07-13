@@ -18,6 +18,7 @@
 #include <iostream>
 #include <QTcpSocket>
 #include <string>
+#include <QDebug>
 
 using namespace std;
 
@@ -40,6 +41,7 @@ SickLDMRSSensor::SickLDMRSSensor()
     S_socket = new SickSocket(this);
     rosHandler = new SickLDMRSROS;
     connect(S_socket, SIGNAL(configuration()), this, SLOT(configure()) );
+    // connect(S_socket, SIGNAL(reconnect()), this, SLOT(startActivity()) );
     pendingBytes.time = 0;
     pendingBytes.previousData = false;
 }
@@ -51,6 +53,7 @@ SickLDMRSSensor::SickLDMRSSensor(QString ip, int port)
     S_socket = new SickSocket(this);
     rosHandler = new SickLDMRSROS;
     connect(S_socket, SIGNAL(configuration()), this, SLOT(configure()) );
+    // connect(S_socket, SIGNAL(reconnect()), this, SLOT(startActivity()) );
     pendingBytes.time = 0;
     pendingBytes.previousData = false;
 
@@ -72,25 +75,28 @@ void SickLDMRSSensor::startActivity()
 
 void SickLDMRSSensor::stopActivity()
 {
-    S_socket->sendToServer(QString((uint32_t)0x0021));
+    S_socket->sendToServer(QString::number((uint32_t)0x0021));
     S_socket->closeSocket();
 }
 
 
 
-uint32_t SickLDMRSSensor::findMagicWord(const char * message, const unsigned length)
+int32_t SickLDMRSSensor::findMagicWord(const char * message, const unsigned length)
 {
     if (length < 4) {
         return -1;
     }
 
-    unsigned long i = 0;
+    int32_t i = 0;
+
     while(*((uint32_t*)(message+i)) != 0xC2C0FEAF){ // BigE
         if (i == length) {
             return -1;
         }
         ++i;
+
     }
+
     return i;
 
 }
@@ -191,23 +197,23 @@ void SickLDMRSSensor::storePendingBytes(road_time_t time)
 
 void SickLDMRSSensor:: splitPacket(const char * packet, const int length, road_time_t time)
 { 
-    long index = 0;
+    int32_t index = 0;
     long msgSize = 0;
     bool msgComplete = false;
 
     // we are working on the previous not decoded data + the actual incoming packet
     pendingBytes.data.append(packet,length);
 
-
-    while (pendingBytes.data.size() > 0)
+    if (pendingBytes.data.size() > 0)
     {
         // we are looking for the MagicWord
         index = findMagicWord(pendingBytes.data.c_str() , pendingBytes.data.size());
+
         if (index == -1)
         {
             storePendingBytes(time);
             // exit the while loop
-            break;
+            return;
         }
 
 
@@ -217,7 +223,7 @@ void SickLDMRSSensor:: splitPacket(const char * packet, const int length, road_t
         {
             storePendingBytes(time);
             // exit the while loop
-            break;
+            return;
         }
 
 
@@ -227,7 +233,7 @@ void SickLDMRSSensor:: splitPacket(const char * packet, const int length, road_t
         {
             storePendingBytes(time);
             // exit the while loop
-            break;
+            return;
         }
 
         // we have a complete message available that we can add to the list
@@ -309,9 +315,9 @@ unsigned long SickLDMRSSensor::processMessage(MessageLDMRS &msg)
 
 void SickLDMRSSensor::configure(){
     // Start measuring
-    // S_socket->sendToServer(QString((uint32_t)0x0020));
+    S_socket->sendToServer(QString::number((uint32_t)0x0020));
 
-    // ROS_DEBUG(this->name_ +" configured.");
+    ROS_DEBUG("start measuring.");
 }
 
 

@@ -93,7 +93,7 @@ public:
  * two files (.dbt and .utc).
  * It can be managed by SickComponent objects.
  */
-class SickLDMRSSensor : public QThread
+class SickLDMRSSensor : QThread
 {
     Q_OBJECT
 public:
@@ -116,7 +116,6 @@ public:
     void run() {}
 
     void stopActivity(); /*!< To stop the processing thread */
-    void startActivity(); /*!< To start the processing thread */
 
     /**
      * @brief splitPacket reconstitute incoming data and find messages.
@@ -151,7 +150,7 @@ public:
      * - @b -1 if no magic word is found
      * - @b position of the magic word otherwise
      */
-    u_int32_t findMagicWord(const char * message, const unsigned length);
+    int32_t findMagicWord(const char * message, const unsigned length);
 
     /**
     * @brief getMessageSize get the message size of the entire message.
@@ -164,7 +163,7 @@ public:
     * - The first header of the message that contains the size of the message is in \b Big \b Endian format !
     *
     */
-    u_int32_t getMessageSize(const char * message, const unsigned length, const long magicWordIndex);
+    uint32_t getMessageSize(const char * message, const unsigned length, const long magicWordIndex);
 
     /**
      * @brief isMessageComplete compare the size of the message read into the message and the length of the received data.
@@ -181,6 +180,7 @@ public Q_SLOTS:
      */
     void customEvent(QEvent * e);
 
+    void startActivity(); /*!< To start the processing thread */
     /**
      * @brief Configure the object, not used for the moment.
      */

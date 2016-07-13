@@ -5,10 +5,10 @@
 
 int main (int argc, char *argv[]) 
 {
-	ros::init(argc, argv, "lidar"); 
-	pacpus::SickLDMRSSensor sensor;
-	sensor.startActivity();
 	QCoreApplication app(argc, argv);
+	ros::init(argc, argv, "lidar"); 
+	pacpus::SickLDMRSSensor sensor("0.0.0.0", 12000);
+	sensor.startActivity();
 	return app.exec();
 }
 

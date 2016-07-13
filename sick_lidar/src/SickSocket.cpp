@@ -14,7 +14,6 @@
 
 #include <QCoreApplication>
 #include <QDebug>
-#include <ros/ros.h>
 
 
 namespace pacpus {
@@ -41,6 +40,12 @@ void SickSocket::connectToServer(QString host, int port)
 {
   qDebug("trying to connect to server");
   socket->connectToHost(host,port);
+
+  if(!socket->waitForConnected(3000))
+  {
+      qDebug() << "Error: " << socket->errorString();
+  }
+
 }
 
 
@@ -57,7 +62,7 @@ int SickSocket::socketConnected()
 /// protected slot
 void SickSocket::socketConnectionClosed()
 {
-  qDebug("the connection was closed");
+  qDebug() << "the connection was closed";
 }
 
 
@@ -69,7 +74,7 @@ void SickSocket::socketReadyRead()
   frame->msg = new char[frame->size]; 
 
   if (!frame->msg) {
-      ROS_FATAL("cannot allocate memory");
+      qDebug() <<"cannot allocate memory";
   }
 
   frame->size = socket->read(frame->msg, (qint64) frame->size);
@@ -88,11 +93,11 @@ void SickSocket::socketError(QAbstractSocket::SocketError e)
 
 void SickSocket::sendToServer(QString data) //a adapter aux données binaires
 {
-  mutex.lock();
-  QTextStream os(socket);
-  os << data.toAscii() << endl;
-  mutex.unlock();
-  qDebug() << "data sent to server: " << data.toAscii() ; //a adapter aussi
+  // mutex.lock();
+  QByteArray ascii = data.toAscii(); 
+  socket->write("stuff");
+  // mutex.unlock();
+  qDebug() << "data sent to server: " << ascii; //a adapter aussi
 }
 
 } // namespace pacpus
