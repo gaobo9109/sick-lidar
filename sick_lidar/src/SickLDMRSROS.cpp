@@ -6,7 +6,7 @@
 #define PI 3.14159265
 
 
-namespace pacpus{
+namespace sick_lidar{
 
 float elevAngle[4] = {-1.2, -0.4, 0.4, 1.2};
 
@@ -41,24 +41,24 @@ void SickLDMRSROS::polar2Cartesian(ScanPoint &ptPolar, pcl::PointXYZ &ptXYZ, flo
 
 void SickLDMRSROS::makePointCloud(MessageLDMRS *message)
 {
-	cloud.header.stamp = ros::Time::now().toNSec();
-	cloud.header.frame_id = "Point_cloud";
-	uint16_t numPoints = message->hScan.numPoints;
-	float radPerTick = 2*PI/message->hScan.ticksPerRot;
+//	cloud.header.stamp = ros::Time::now().toNSec();
+//	cloud.header.frame_id = "Point_cloud";
+//	uint16_t numPoints = message->hScan.numPoints;
+//	float radPerTick = 2*PI/message->hScan.ticksPerRot;
 
-	cloud.height = 1;
-	cloud.width = numPoints;
+//	cloud.height = 1;
+//	cloud.width = numPoints;
 
-	for(int i=0; i<numPoints; i++)
-	{	
-		ScanPoint ptPolar = *(ScanPoint*)(message->body + i*sizeof(ScanPoint));
-		pcl::PointXYZ ptXYZ;
-		polar2Cartesian(ptPolar, ptXYZ, radPerTick);
-		cloud.points.push_back(ptXYZ);
-	}
+//	for(int i=0; i<numPoints; i++)
+//	{
+//		ScanPoint ptPolar = *(ScanPoint*)(message->body + i*sizeof(ScanPoint));
+//		pcl::PointXYZ ptXYZ;
+//		polar2Cartesian(ptPolar, ptXYZ, radPerTick);
+//		cloud.points.push_back(ptXYZ);
+//	}
 
-	pclPub.publish(cloud);
-	cloud.points.clear();
+//	pclPub.publish(cloud);
+//	cloud.points.clear();
 }
 
 

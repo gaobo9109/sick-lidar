@@ -9,7 +9,7 @@
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
-namespace pacpus{
+namespace sick_lidar{
 
 class MessageLDMRS;
 struct ScanPoint;

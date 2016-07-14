@@ -14,12 +14,46 @@
 #ifndef __SICKLDMRS_DATA_H__
 #define __SICKLDMRS_DATA_H__
 
-#include "cstdint.h"
-#include "road_time.h"
+#include "stdint.h"
 
+namespace sick_lidar{
 
+static const uint32_t MAGICWORD = 0xC2C0FEAF; // Big E
 
-namespace pacpus{
+/*!
+ * Sick LD-MRS Data Type, Big E
+ */
+
+static const uint16_t SICKLDMRS_SCANDATA_TYPE    = 0x0222;
+static const uint16_t SICKLDMRS_OBJECTDATA_TYPE  = 0x2122;
+static const uint16_t SICKLDMRS_COMMAND_TYPE = 0x1020;
+static const uint16_t SICKLDMRS_ERROR_TYPE = 0x3020;
+
+/*!
+ * Sick LD_MRS command ID, Little E
+ */
+
+static const uint16_t COMMAND_RESET = 0x0000;
+static const uint16_t COMMAND_GET_STATUS = 0x0001;
+static const uint16_t COMMAND_SAVE_CONF = 0x0004;
+static const uint16_t COMMAND_SET_PARAM = 0x0010;
+static const uint16_t COMMAND_GET_PARAM = 0x0011;
+static const uint16_t COMMAND_RESET_PARAM = 0x001A;
+static const uint16_t COMMAND_START_MEASURE = 0x0020;
+static const uint16_t COMMAND_STOP_MEASURE = 0x0021;
+
+/*!
+ * Sick LD_MRS parameter index, Little E
+ * TODO
+ */
+
+/*
+ * Sick LD_MRS command message size
+ */
+
+static const uint8_t SIZE_COMMAND_SET = 28;
+static const uint8_t SIZE_COMMAND_GET_PARAM = 30;
+static const uint8_t SIZE_COMMAND_SET_PARAM = 34;
 
 /*!
  * \brief The DataHeader struct
@@ -33,7 +67,7 @@ struct DataHeader {
     uint32_t magicWord;            //!< 0xAFFEC0C2 for the Sick LDMRS sensor (this value must be found in order to decode the message).
     uint32_t sizePreviousMessage;  //!< Size in bytes of the previous message.
     uint32_t sizeCurrentMessage;   //!< Size of the message content without the header (DataHeader).
-    // u_int8_t reserved
+    uint8_t reserved;
     uint8_t deviceId;              //!< Unused in data received directly from LD-MRS sensors.
     uint16_t dataType;             //!< Type of information carried into the message.
                                     ///< Types used are :
@@ -101,6 +135,24 @@ struct ScanPoint{
     uint16_t distance;         //!< Distance of the point from the sensor in centimeters.
     uint16_t echoPulseWidth;   //!< Width of echo pulse (cm)
     // u_int16_t reserved;
+};
+
+struct SetCommand{
+    uint16_t commandID;
+    uint16_t reserved;
+};
+
+struct SetParamCommand{
+    uint16_t commandID;
+    uint16_t reserved;
+    uint16_t commandIndex;
+    uint32_t param;
+};
+
+struct GetParamCommand{
+    uint16_t commandID;
+    uint16_t reserved;
+    uint16_t commandIndex;
 };
 
 

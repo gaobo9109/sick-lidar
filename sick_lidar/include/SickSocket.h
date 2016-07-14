@@ -20,10 +20,9 @@
 #include <QTcpSocket>
 #include <QMutex>
 #include <QEvent>
+#include <ros/ros.h>
 
-#include "road_time.h"
-
-namespace pacpus {
+namespace sick_lidar {
 
 
 // Sensors classes :
@@ -41,7 +40,7 @@ public:
     SickFrame()
     {
         size = 0;
-        time = 0;
+        time = ros::Time::now();
         msg = NULL;
     }
     
@@ -52,7 +51,7 @@ public:
     }
     
     qint64 size; //!< Size of incoming packet.
-    road_time_t time; //!< Time when packet is received.
+    ros::Time time; //!< Time when packet is received.
     char * msg; //!< Packet (raw data).
 };
 
@@ -113,7 +112,7 @@ public Q_SLOTS:
      * @brief sendToServer Sends data to the remote lidar.
      * @param data Data to be sent, translated in ASCII.
      */
-    void sendToServer(QString data);
+    void sendToServer(const char *data);
     
 Q_SIGNALS:
     /// Asked for configuring sensor.
@@ -127,14 +126,9 @@ protected slots:
     void socketError(QAbstractSocket::SocketError e); 
 
 private:
-    /// Socket
     QTcpSocket *socket; 
-
-    /// Mutex to use socket resource.
-    QMutex mutex;
-
-    /// Parent (contains slots to connect to in order to pass the received data).
     SickLDMRSSensor *myParent;
+
 };
 
 } // namespace pacpus

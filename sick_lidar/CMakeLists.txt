@@ -1,13 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(sick_lidar)
 
-################################################################################
-add_definitions( -DSICKLDMRS_EXPORTS )
 
-
-# ========================================
-# Find Packages
-# ========================================
 find_package(Qt4 REQUIRED)
 
 if(QT4_FOUND)
@@ -18,7 +12,10 @@ else()
   message(ERROR "Qt4 needed")
 endif()
 
-find_package(PCL 1.3 REQUIRED COMPONENTS common io)
+find_package(PCL 1.3 REQUIRED COMPONENTS
+  common
+  io
+)
 
 find_package(catkin REQUIRED COMPONENTS
   message_generation
@@ -34,22 +31,16 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES  ${PROJECT_NAME}
+  LIBRARIES sick_lib
   CATKIN_DEPENDS nodelet roscpp rospy sensor_msgs std_msgs tf
   DEPENDS system_lib
 )
 
-# ========================================
-# Compiler definitions
-# ========================================
 add_definitions(
   ${QT_DEFINITIONS}
   ${PCL_DEFINITIONS}
 )
 
-# ========================================
-# Include directories
-# ========================================
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
@@ -57,50 +48,21 @@ include_directories(
   ${PCL_INCLUDE_DIRS}
 )
 
-# ========================================
-# Link directories
-# ========================================
 link_directories(
   ${PCL_LIBRARY_DIRS}
 )
 
-# ========================================
-# List of sources
-# ========================================
-set(PROJECT_SRCS
-  src/SickSocket.cpp
-  src/SickLDMRSSensor.cpp
-  src/SickLDMRSROS.cpp
-  src/SickDriver.cpp
-
-)
-
-
-
-# ========================================
-# Call MOC
-# ========================================
 qt4_wrap_cpp(PROJECT_MOC_SRCS
     include/SickLDMRSSensor.h
     include/SickSocket.h
 )
 
-add_executable(driver
-    src/SickDriver.cpp
-)
-
-# ========================================
-# Build a library
-# ========================================
 add_library(sick_lib
-    ${PROJECT_SRCS}
+    src/SickLDMRSROS.cpp
+    src/SickLDMRSCommand.cpp
     ${PROJECT_MOC_SRCS}
 )
 
-# ========================================
-# Libraries
-# ========================================
-# All the platform
 
 target_link_libraries(sick_lib
     ${QT_LIBRARIES}
@@ -109,6 +71,11 @@ target_link_libraries(sick_lib
     ${PCL_IO_LIBRARIES}
 )
 
+add_executable(driver
+    src/SickDriver.cpp
+    src/SickSocket.cpp
+    src/SickLDMRSSensor.cpp
+)
 
 target_link_libraries(driver
     sick_lib

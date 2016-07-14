@@ -11,12 +11,12 @@
 *********************************************************************/
 
 #include "SickSocket.h"
-
+#include <ros/ros.h>
 #include <QCoreApplication>
 #include <QDebug>
+#include "DebugUtil.h"
 
-
-namespace pacpus {
+namespace sick_lidar {
 
 
 SickSocket::SickSocket(SickLDMRSSensor * parent)
@@ -68,8 +68,9 @@ void SickSocket::socketConnectionClosed()
 
 void SickSocket::socketReadyRead()
 {   
+  qDebug() << "byte available";
   SickFrame * frame = new SickFrame();
-  frame->time = road_time(); 
+  frame->time = ros::Time::now();
   frame->size = socket->bytesAvailable(); 
   frame->msg = new char[frame->size]; 
 
@@ -91,13 +92,12 @@ void SickSocket::socketError(QAbstractSocket::SocketError e)
 }
 
 
-void SickSocket::sendToServer(QString data) //a adapter aux données binaires
+void SickSocket::sendToServer(const char* data)
 {
-  // mutex.lock();
-  QByteArray ascii = data.toAscii(); 
-  socket->write("stuff");
-  // mutex.unlock();
-  qDebug() << "data sent to server: " << ascii; //a adapter aussi
+  int bytesWritten = socket->write(data);
+  DebugUtil::printArray(data,28);
+  delete data; //delete array on the heap
 }
 
-} // namespace pacpus
+
+}
