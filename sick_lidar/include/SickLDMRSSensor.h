@@ -31,7 +31,7 @@ namespace sick_lidar {
 class SickLDMRSROS;
 
 struct MessagePacket {
-    ros::Time time;
+    uint32_t time;
     std::string data;
     bool previousData;
 };
@@ -40,20 +40,24 @@ class MessageLDMRS
 {
 public:
 
-    MessageLDMRS()
-    {
-        msgType = 0;
-        time = ros::Time::now();
-    }
-
+    MessageLDMRS(){}
     ~MessageLDMRS(){}
 
-
-    u_int16_t msgType;
-
+    uint16_t msgType;
     char body[BODY_MAX_SIZE];
+    uint32_t time;
 
-    ros::Time time;
+};
+
+class MessageScanData
+{
+public:
+    MessageScanData(){}
+    ~MessageScanData(){}
+
+    ScanHeader header;
+    std::vector<ScanPoint> scanPoints;
+    uint32_t time;
 
 };
 
@@ -87,11 +91,12 @@ private:
     std::list<MessageLDMRS> msgList;
     MessagePacket pendingBytes;
 
-    void storePendingBytes(ros::Time time);
+    void storePendingBytes(uint32_t time);
     void fillDataHeader(MessageLDMRS& msg);
     void fillScanHeader(MessageLDMRS& msg);
-    void splitPacket(const char * packet, const int length, ros::Time time);
-    unsigned long processMessage(MessageLDMRS & msg);
+    void splitPacket(const char * packet, const int length, uint32_t time);
+    void handleScanMessage(MessageLDMRS &msg);
+    void processMessage(MessageLDMRS & msg);
     int32_t findMagicWord(const char * message, const unsigned length);
     uint32_t getMessageSize(const char * message, const unsigned length, const long magicWordIndex);
     uint16_t getMessageType(const char * message, const long magicWordIndex);
@@ -99,6 +104,6 @@ private:
 
 };
 
-} // namespace pacpus
+}
 
 #endif // SICKLDMRSSENSOR_H

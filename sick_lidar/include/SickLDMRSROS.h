@@ -7,7 +7,9 @@
 #include <pcl_ros/point_cloud.h>
 #include <pcl/point_types.h>
 
+typedef pcl::PointXYZ Point3D;
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
+
 
 namespace sick_lidar{
 
@@ -16,21 +18,23 @@ struct ScanPoint;
 
 class SickLDMRSROS
 {
-	public:
-		SickLDMRSROS();
-		~SickLDMRSROS();
-		void makePointCloud(MessageLDMRS *message);
+public:
+    SickLDMRSROS();
+    ~SickLDMRSROS();
+   void publishData(MessageScanData &data);
 
-	private:
+private:
 
-		ros::NodeHandle	nh;
-		ros::Publisher pclPub;
-		PointCloud cloud;
-		float vSinLut[4];
-		float vCosLut[4];
+    ros::NodeHandle	nh;
+    ros::Publisher pclPub;
+    PointCloud cloud;
+    float vSinLut[4];
+    float vCosLut[4];
 
-		void initLut();
-		void polar2Cartesian(ScanPoint &ptPolar, pcl::PointXYZ &ptXYZ, float radPerTick);
+    void initLut();
+    void makePointCloud(MessageScanData &data);
+    void makeScan(MessageScanData &data);
+    void polar2Cartesian(ScanPoint &ptPolar, Point3D &ptXYZ, float radPerTick);
 
 };
 

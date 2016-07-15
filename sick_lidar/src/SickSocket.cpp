@@ -68,9 +68,8 @@ void SickSocket::socketConnectionClosed()
 
 void SickSocket::socketReadyRead()
 {   
-  qDebug() << "byte available";
   SickFrame * frame = new SickFrame();
-  frame->time = ros::Time::now();
+  frame->time = ros::Time::now().toSec();
   frame->size = socket->bytesAvailable(); 
   frame->msg = new char[frame->size]; 
 
@@ -79,6 +78,8 @@ void SickSocket::socketReadyRead()
   }
 
   frame->size = socket->read(frame->msg, (qint64) frame->size);
+//  DebugUtil::printArray(frame->msg,frame->size);
+//  qDebug() << " ";
 
   SickFrameEvent *e = new SickFrameEvent;
   e->frame = frame; 
@@ -92,11 +93,9 @@ void SickSocket::socketError(QAbstractSocket::SocketError e)
 }
 
 
-void SickSocket::sendToServer(const char* data)
+void SickSocket::sendToServer(QByteArray data)
 {
-  int bytesWritten = socket->write(data);
-  DebugUtil::printArray(data,28);
-  delete data; //delete array on the heap
+  socket->write(data);
 }
 
 

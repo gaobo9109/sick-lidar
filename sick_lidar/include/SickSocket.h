@@ -40,7 +40,7 @@ public:
     SickFrame()
     {
         size = 0;
-        time = ros::Time::now();
+        time = 0;
         msg = NULL;
     }
     
@@ -51,7 +51,7 @@ public:
     }
     
     qint64 size; //!< Size of incoming packet.
-    ros::Time time; //!< Time when packet is received.
+    uint32_t time; //!< Time when packet is received.
     char * msg; //!< Packet (raw data).
 };
 
@@ -112,7 +112,7 @@ public Q_SLOTS:
      * @brief sendToServer Sends data to the remote lidar.
      * @param data Data to be sent, translated in ASCII.
      */
-    void sendToServer(const char *data);
+    void sendToServer(QByteArray data);
     
 Q_SIGNALS:
     /// Asked for configuring sensor.

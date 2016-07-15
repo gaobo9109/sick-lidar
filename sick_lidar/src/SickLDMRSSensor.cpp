@@ -16,6 +16,7 @@
 #include "SickLDMRSROS.h"
 #include "SickLDMRSData.h"
 #include "SickLDMRSCommand.h"
+#include "DebugUtil.h"
 #include <QTcpSocket>
 #include <string>
 #include <QDebug>
@@ -32,7 +33,7 @@ SickLDMRSSensor::SickLDMRSSensor(QString ip, int port)
     S_socket = new SickSocket(this);
     rosHandler = new SickLDMRSROS;
     connect(S_socket, SIGNAL(configuration()), this, SLOT(configure()) );
-    pendingBytes.time = ros::Time::now();
+    pendingBytes.time = 0;
     pendingBytes.previousData = false;
     initDevice();
 
@@ -48,20 +49,21 @@ SickLDMRSSensor::~SickLDMRSSensor()
 
 void SickLDMRSSensor::initDevice()
 {
-    S_socket->connectToServer(ipaddr_, port_);
+    S_socket->connectToServer(ipaddr_,port_);
+
 }
 
 
 void SickLDMRSSensor::closeDevice()
 {
-
+    stopScanner();
     S_socket->closeSocket();
 }
 
 void SickLDMRSSensor::startScanner()
 {
     // Start measuring
-    S_socket->sendToServer(SickLDMRSCommand::genSetCommand(COMMAND_START_MEASURE));
+    S_socket->sendToServer(SickLDMRSCommand::genSetCommand(COMMAND_GET_PARAM));
     ROS_DEBUG("start measuring.");
 }
 
@@ -73,22 +75,18 @@ void SickLDMRSSensor::stopScanner()
 
 int32_t SickLDMRSSensor::findMagicWord(const char * message, const unsigned length)
 {
-    if (length < 4) {
+    if (length < 4){
         return -1;
     }
 
     int32_t i = 0;
-
     while(*((uint32_t*)(message+i)) != MAGICWORD){ // BigE
         if (i == length) {
             return -1;
         }
         ++i;
-
     }
-
     return i;
-
 }
 
 
@@ -108,7 +106,7 @@ uint32_t SickLDMRSSensor::getMessageSize(const char * message, const unsigned le
 
 uint16_t SickLDMRSSensor::getMessageType(const char * message, const long magicWordIndex)
 {
-    return *(message+magicWordIndex);
+    return *(message+magicWordIndex+14);
 }
 
 
@@ -121,30 +119,7 @@ bool SickLDMRSSensor::isMessageComplete(const unsigned length, const long size)
 }
 
 
-void SickLDMRSSensor::fillScanHeader( MessageLDMRS &msg )
-{
-    // address = base + Data header size (24-byte long) + offset
-//    msg.hScan.scanNumber = *((uint16_t*)(msg.body+24));
-//    msg.hScan.scannerStatus = *((uint16_t*)(msg.body+24+2));
-//    msg.hScan.phaseOffset = *((uint16_t*)(msg.body+24+4));
-//    msg.hScan.startNtpTime = *((uint64_t*)(msg.body+24+6));
-//    msg.hScan.endNtpTime = *((uint64_t*)(msg.body+24+14));
-//    msg.hScan.ticksPerRot= *((uint16_t*)(msg.body+24+22)); // needed to compute angle (°)
-//    msg.hScan.startAngle = *((int16_t*)(msg.body+24+24));
-//    msg.hScan.endAngle = *((int16_t*)(msg.body+24+26));
-//    msg.hScan.numPoints = *((uint16_t*)(msg.body+24+28));
-
-//    msg.hScan.mountingYawAngle = *((int16_t*)(msg.body+24+30));
-//    msg.hScan.mountingPitchAngle = *((int16_t*)(msg.body+24+32));
-//    msg.hScan.mountingRollAngle = *((int16_t*)(msg.body+24+34));
-//    msg.hScan.mountingX = *((int16_t*)(msg.body+24+36));
-//    msg.hScan.mountingY = *((int16_t*)(msg.body+24+38));
-//    msg.hScan.mountingZ = *((int16_t*)(msg.body+24+40));
-}
-
-
-
-void SickLDMRSSensor::storePendingBytes(ros::Time time)
+void SickLDMRSSensor::storePendingBytes(uint32_t time)
 {
     if (!pendingBytes.previousData)
     {
@@ -154,7 +129,7 @@ void SickLDMRSSensor::storePendingBytes(ros::Time time)
 }
 
 
-void SickLDMRSSensor:: splitPacket(const char * packet, const int length, ros::Time time)
+void SickLDMRSSensor:: splitPacket(const char * packet, const int length, uint32_t time)
 { 
     int32_t index = 0;
     long msgSize = 0;
@@ -169,9 +144,11 @@ void SickLDMRSSensor:: splitPacket(const char * packet, const int length, ros::T
 
         if (index == -1)
         {
+            qDebug() << "cannot find magic word";
             storePendingBytes(time);
             break;
         }
+
 
         // we are looking for the size of the message (scan data + scan points)
         msgSize = getMessageSize(pendingBytes.data.c_str(), pendingBytes.data.size(), index);
@@ -183,12 +160,18 @@ void SickLDMRSSensor:: splitPacket(const char * packet, const int length, ros::T
 
         // we are verifying if the message is complete
         msgComplete = isMessageComplete( pendingBytes.data.size() , msgSize );
+
         if (msgComplete == false)
         {
             storePendingBytes(time);
             break;
         }
 
+        qDebug() << "message output: ";
+        DebugUtil::printArray(pendingBytes.data.c_str(),pendingBytes.data.size());
+        qDebug() << "string size" << pendingBytes.data.size();
+        qDebug() << "message size" << msgSize;
+        qDebug() << " ";
         MessageLDMRS msg;
 
         msgType = getMessageType(pendingBytes.data.c_str(),index);
@@ -212,85 +195,63 @@ void SickLDMRSSensor:: splitPacket(const char * packet, const int length, ros::T
     }
 }
 
+void SickLDMRSSensor::handleScanMessage(MessageLDMRS &msg)
+{
+    MessageScanData scan;
+    scan.time = msg.time;
 
-unsigned long SickLDMRSSensor::processMessage(MessageLDMRS &msg)
+    memcpy(&scan.header, msg.body,sizeof(ScanHeader));
+    int numPoints = scan.header.scanNumber;
+
+    for(int i=0; i<numPoints; i++){
+        ScanPoint point;
+        memcpy(&point, msg.body+sizeof(ScanHeader)+i*sizeof(ScanPoint),sizeof(ScanPoint));
+        scan.scanPoints.push_back(point);
+    }
+
+    rosHandler->publishData(scan);
+
+}
+
+
+void SickLDMRSSensor::processMessage(MessageLDMRS &msg)
 { 
-//    if (msg.msgType == SICKLDMRS_SCANDATA_TYPE) {
-//        ROS_DEBUG("(Process Message) Scan Data Type!");
-//        fillScanHeader(msg);
+    if (msg.msgType == SICKLDMRS_SCANDATA_TYPE) {
+        handleScanMessage(msg);
+        qDebug() << "scan data";
+    }
+    else if (msg.msgType == SICKLDMRS_ERROR_TYPE){
+        //TODO
 
-//        int index = 24 + 44; // data header + scan header
+    }
+    else if(msg.msgType == SICKLDMRS_REPLY_TYPE){
+        //TODO
+        qDebug() << "reply data";
+    }
 
-//        if(sizeof(ScanPoint) * msg.hScan.numPoints > BODY_MAX_SIZE){
-//            ROS_FATAL("Size of the message is too long !");
-//            return 0;
-//        }
-
-//        ScanPoint scanPoints[msg.hScan.numPoints];
-
-//        // replace memory with structured data
-//        for (int i = 0; i < msg.hScan.numPoints; ++i) {
-//            scanPoints[i].layerEcho = *((uint8_t*)(msg.body + index));
-//            scanPoints[i].flags = *((uint8_t*)(msg.body + index + 1));
-//            scanPoints[i].angle = *((uint16_t*)(msg.body + index + 2));
-//            scanPoints[i].distance = *((uint16_t*)(msg.body + index + 4));
-//            scanPoints[i].echoPulseWidth = *((uint16_t*)(msg.body + index + 6));
-//        }
-
-//        memcpy(msg.body, scanPoints, sizeof(ScanPoint) * msg.hScan.numPoints);
-//    }
-//    else if (msg.hData.dataType == SICKLDMRS_OBJECTDATA_TYPE){
-//        ROS_DEBUG("(Process Message) Object Data Type!");
-
-//        // TODO
-//    }
-//    else {// irrelevant data type
-//        // TODO
-//    }
-
-
-//    return msg.hData.dataType;
 }
 
 
 
 
 void SickLDMRSSensor::configure(){
-
+    startScanner();
 }
 
 
 void SickLDMRSSensor::customEvent(QEvent * e)
 {   
     SickFrame * frame = ((SickFrameEvent*)e)->frame;
-
-    // we try to find some messages in the current packet + the pending bytes of the previous incoming data
     splitPacket(frame->msg, frame->size, frame->time);
-
-    // we delete the heap variable
     delete frame;
 
-    // we test if we have some messages to decode
     while ( !msgList.empty() )
     {
-        ROS_DEBUG("Message waiting");
-        // get the first (the eldest) message and process it
         MessageLDMRS msgToProcess = msgList.front();
-        unsigned long type = processMessage(msgToProcess);
-        ROS_DEBUG("Message processed !");
-
-        if (type == SICKLDMRS_SCANDATA_TYPE)
-        {
-            rosHandler->makePointCloud(&msgToProcess);
-        }
-        else if (type == SICKLDMRS_OBJECTDATA_TYPE)
-        {
-            // Handled via CAN bus ?
-        }
-
+        processMessage(msgToProcess);
         msgList.pop_front();
     }
 }
 
-} // namespace pacpus
+}
 

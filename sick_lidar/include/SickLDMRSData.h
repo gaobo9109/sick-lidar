@@ -28,6 +28,7 @@ static const uint16_t SICKLDMRS_SCANDATA_TYPE    = 0x0222;
 static const uint16_t SICKLDMRS_OBJECTDATA_TYPE  = 0x2122;
 static const uint16_t SICKLDMRS_COMMAND_TYPE = 0x1020;
 static const uint16_t SICKLDMRS_ERROR_TYPE = 0x3020;
+static const uint16_t SICKLDMRS_REPLY_TYPE = 0x2020;
 
 /*!
  * Sick LD_MRS command ID, Little E
@@ -47,22 +48,7 @@ static const uint16_t COMMAND_STOP_MEASURE = 0x0021;
  * TODO
  */
 
-/*
- * Sick LD_MRS command message size
- */
 
-static const uint8_t SIZE_COMMAND_SET = 28;
-static const uint8_t SIZE_COMMAND_GET_PARAM = 30;
-static const uint8_t SIZE_COMMAND_SET_PARAM = 34;
-
-/*!
- * \brief The DataHeader struct
- *
- * The DataHeader struct describes general information about the message used with.
- * On Sick LDMRS, DataHeader corresponds exactly to the very first data carried into the whole message.
- * See [Ethernet data protocol LD-MRS, page 4](docs/BAMessdatenProtokoll_LDMRSen_8014492_20110601.pdf).
- * > Warning : the data from the sensor is coded in Big Endian format.
- */
 struct DataHeader {
     uint32_t magicWord;            //!< 0xAFFEC0C2 for the Sick LDMRS sensor (this value must be found in order to decode the message).
     uint32_t sizePreviousMessage;  //!< Size in bytes of the previous message.
@@ -77,15 +63,6 @@ struct DataHeader {
 };
 
 
-/*!
- * \brief The ScanHeader struct
- *
- * General information about points measured.
- * Data type is 0x2202
- * @see DataHeader
- *
- * see Ethernet data protocol LD-MRS page 5
- */
 struct ScanHeader {
     uint16_t scanNumber;       //!< Number of the scan since the sensor started measuring.
     uint16_t scannerStatus;    //!< Status of the scanner
@@ -97,7 +74,6 @@ struct ScanHeader {
                                  * - 0x0040: sync master (instead of slave),
                                  * - 0xFF80: reserved
                                  */
-
     uint16_t phaseOffset;  ///<
     uint64_t startNtpTime; //!< NTP time first measurement
     uint64_t endNtpTime;   //!< NTP time last measurement
@@ -107,24 +83,18 @@ struct ScanHeader {
     uint16_t numPoints;    //!< Number of scanned points during this scan @see ScanPoint
 
     // mounting position; reference ?
-//    int16_t mountingYawAngle;
-//    int16_t mountingPitchAngle;
-//    int16_t mountingRollAngle;
-//    int16_t mountingX;
-//    int16_t mountingY;
-//    int16_t mountingZ;
+    int16_t mountingYawAngle;
+    int16_t mountingPitchAngle;
+    int16_t mountingRollAngle;
+    int16_t mountingX;
+    int16_t mountingY;
+    int16_t mountingZ;
 
-    // u_int16_t reserved;
+    uint16_t reserved;
 
 };
 
 
-/*!
- * \brief The ScanPoint struct
- *
- * Used to describe a point.
- * Data type 0x2202 @see DataHeader
- */
 struct ScanPoint{
     uint8_t layerEcho;           //!< 4 LSB : Layer (scan layer of the point)
                                 //!< 4 MSB : Echo
@@ -134,8 +104,9 @@ struct ScanPoint{
 
     uint16_t distance;         //!< Distance of the point from the sensor in centimeters.
     uint16_t echoPulseWidth;   //!< Width of echo pulse (cm)
-    // u_int16_t reserved;
+    uint16_t reserved;
 };
+
 
 struct SetCommand{
     uint16_t commandID;
