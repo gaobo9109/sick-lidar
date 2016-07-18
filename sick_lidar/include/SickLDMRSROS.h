@@ -6,15 +6,21 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl/point_types.h>
+#include "SickLDMRSData.h"
+#include "SickLDMRSSensor.h"
+
+#define PI 3.14159265
 
 typedef pcl::PointXYZ Point3D;
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
 
+
 namespace sick_lidar{
 
-class MessageLDMRS;
-struct ScanPoint;
+
+static const float RAD_PER_TICK = 2*PI/11520;
+
 
 class SickLDMRSROS
 {
@@ -34,7 +40,7 @@ private:
     void initLut();
     void makePointCloud(MessageScanData &data);
     void makeScan(MessageScanData &data);
-    void polar2Cartesian(ScanPoint &ptPolar, Point3D &ptXYZ, float radPerTick);
+    void polar2Cartesian(ScanPoint &ptPolar, Point3D &ptXYZ);
 
 };
 

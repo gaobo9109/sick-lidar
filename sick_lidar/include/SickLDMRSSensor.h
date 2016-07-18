@@ -22,6 +22,7 @@
 
 
 #define BODY_MAX_SIZE   10000
+#define POINTS_MAX_SIZE 1000
 
 class QEvent;
 
@@ -56,7 +57,7 @@ public:
     ~MessageScanData(){}
 
     ScanHeader header;
-    std::vector<ScanPoint> scanPoints;
+    ScanPoint scanPoints[POINTS_MAX_SIZE];
     uint32_t time;
 
 };
@@ -92,8 +93,7 @@ private:
     MessagePacket pendingBytes;
 
     void storePendingBytes(uint32_t time);
-    void fillDataHeader(MessageLDMRS& msg);
-    void fillScanHeader(MessageLDMRS& msg);
+    void fillScanHeader(MessageLDMRS& msg, MessageScanData& scan);
     void splitPacket(const char * packet, const int length, uint32_t time);
     void handleScanMessage(MessageLDMRS &msg);
     void processMessage(MessageLDMRS & msg);

@@ -1,9 +1,6 @@
-#include "SickLDMRSData.h"
-#include "SickLDMRSSensor.h"
 #include "SickLDMRSROS.h"
 #include <math.h>  
-
-#define PI 3.14159265
+#include <QDebug>
 
 
 namespace sick_lidar{
@@ -28,9 +25,9 @@ void SickLDMRSROS::initLut(){
 	}
 }
 
-void SickLDMRSROS::polar2Cartesian(ScanPoint &ptPolar, Point3D &ptXYZ, float radPerTick)
+void SickLDMRSROS::polar2Cartesian(ScanPoint &ptPolar, Point3D &ptXYZ)
 {
-	float radAngle = radPerTick * ptPolar.angle;
+    float radAngle = RAD_PER_TICK * ptPolar.angle;
 	uint16_t range = ptPolar.distance;
 	uint8_t layer = ptPolar.layerEcho >> 4;
 	ptXYZ.x = vCosLut[layer] * cos(radAngle) * range;
@@ -45,16 +42,15 @@ void SickLDMRSROS::makePointCloud(MessageScanData &data)
     cloud.header.frame_id = "Point_cloud";
     uint16_t numPoints = data.header.numPoints;
 
-    float radPerTick = 2*PI/data.header.ticksPerRot;
-
     cloud.height = 1;
     cloud.width = numPoints;
+//    qDebug() << numPoints;
 
     for(int i=0; i<numPoints; i++)
     {
-        ScanPoint ptPolar = data.scanPoints.at(i);
+        ScanPoint ptPolar = data.scanPoints[i];
         Point3D ptXYZ;
-        polar2Cartesian(ptPolar, ptXYZ, radPerTick);
+        polar2Cartesian(ptPolar, ptXYZ);
         cloud.points.push_back(ptXYZ);
     }
 

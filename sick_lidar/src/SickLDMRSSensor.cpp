@@ -63,7 +63,7 @@ void SickLDMRSSensor::closeDevice()
 void SickLDMRSSensor::startScanner()
 {
     // Start measuring
-    S_socket->sendToServer(SickLDMRSCommand::genSetCommand(COMMAND_GET_PARAM));
+    S_socket->sendToServer(SickLDMRSCommand::genSetCommand(COMMAND_START_MEASURE));
     ROS_DEBUG("start measuring.");
 }
 
@@ -106,7 +106,7 @@ uint32_t SickLDMRSSensor::getMessageSize(const char * message, const unsigned le
 
 uint16_t SickLDMRSSensor::getMessageType(const char * message, const long magicWordIndex)
 {
-    return *(message+magicWordIndex+14);
+    return *((uint16_t*)(message+magicWordIndex+14));
 }
 
 
@@ -167,12 +167,9 @@ void SickLDMRSSensor:: splitPacket(const char * packet, const int length, uint32
             break;
         }
 
-        qDebug() << "message output: ";
-        DebugUtil::printArray(pendingBytes.data.c_str(),pendingBytes.data.size());
-        qDebug() << "string size" << pendingBytes.data.size();
-        qDebug() << "message size" << msgSize;
-        qDebug() << " ";
+
         MessageLDMRS msg;
+//        DebugUtil::printArray(pendingBytes.data.c_str()+index+24,msgSize-index-24);
 
         msgType = getMessageType(pendingBytes.data.c_str(),index);
         msg.msgType = msgType;
@@ -195,18 +192,48 @@ void SickLDMRSSensor:: splitPacket(const char * packet, const int length, uint32
     }
 }
 
+void SickLDMRSSensor::fillScanHeader(MessageLDMRS &msg, MessageScanData &scan)
+{
+    scan.header.scanNumber = *((u_int16_t*)(msg.body));
+    scan.header.scannerStatus = *((u_int16_t*)(msg.body+2));
+    scan.header.phaseOffset = *((u_int16_t*)(msg.body+4));
+    scan.header.startNtpTime = *((u_int64_t*)(msg.body+6));
+    scan.header.endNtpTime = *((u_int64_t*)(msg.body+14));
+    scan.header.ticksPerRot= *((u_int16_t*)(msg.body+22)); // needed to compute angle (°)
+    scan.header.startAngle = *((int16_t*)(msg.body+24));
+    scan.header.endAngle = *((int16_t*)(msg.body+26));
+    scan.header.numPoints = *((u_int16_t*)(msg.body+28));
+
+    scan.header.mountingYawAngle = *((int16_t*)(msg.body+30));
+    scan.header.mountingPitchAngle = *((int16_t*)(msg.body+32));
+    scan.header.mountingRollAngle = *((int16_t*)(msg.body+34));
+    scan.header.mountingX = *((int16_t*)(msg.body+36));
+    scan.header.mountingY = *((int16_t*)(msg.body+38));
+    scan.header.mountingZ = *((int16_t*)(msg.body+40));
+}
+
 void SickLDMRSSensor::handleScanMessage(MessageLDMRS &msg)
 {
     MessageScanData scan;
     scan.time = msg.time;
 
-    memcpy(&scan.header, msg.body,sizeof(ScanHeader));
-    int numPoints = scan.header.scanNumber;
+//    memcpy(&scan.header, msg.body,sizeof(ScanHeader));
+    fillScanHeader(msg,scan);
+    int index = sizeof(ScanHeader);
+    int numPoints = scan.header.numPoints;
+
+    if(numPoints > sizeof(scan.scanPoints))
+    {
+        ROS_WARN("Cannot allocate memory for %d points",numPoints);
+    }
+    qDebug() << numPoints;
 
     for(int i=0; i<numPoints; i++){
-        ScanPoint point;
-        memcpy(&point, msg.body+sizeof(ScanHeader)+i*sizeof(ScanPoint),sizeof(ScanPoint));
-        scan.scanPoints.push_back(point);
+        scan.scanPoints[i].layerEcho = *((uint8_t*)(msg.body+index));
+        scan.scanPoints[i].flags = *((uchar*)(msg.body + index + 1));
+        scan.scanPoints[i].angle = *((u_int16_t*)(msg.body + index + 2));
+        scan.scanPoints[i].distance = *((u_int16_t*)(msg.body + index + 4));
+        scan.scanPoints[i].echoPulseWidth = *((u_int16_t*)(msg.body + index + 6));
     }
 
     rosHandler->publishData(scan);
