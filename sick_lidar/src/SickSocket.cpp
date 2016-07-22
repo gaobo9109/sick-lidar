@@ -78,8 +78,7 @@ void SickSocket::socketReadyRead()
   }
 
   frame->size = socket->read(frame->msg, (qint64) frame->size);
-//  DebugUtil::printArray(frame->msg,frame->size);
-//  qDebug() << " ";
+
 
   SickFrameEvent *e = new SickFrameEvent;
   e->frame = frame; 

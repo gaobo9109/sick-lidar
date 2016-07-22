@@ -45,9 +45,11 @@ static const uint16_t COMMAND_STOP_MEASURE = 0x0021;
 
 /*!
  * Sick LD_MRS parameter index, Little E
- * TODO
  */
 
+static const uint16_t PARAM_START_ANGLE = 0x1100;
+static const uint16_t PARAM_END_ANGLE = 0x1101;
+static const uint16_t PARAM_SCAN_FREQUENCY = 0x1102;
 
 struct DataHeader {
     uint32_t magicWord;            //!< 0xAFFEC0C2 for the Sick LDMRS sensor (this value must be found in order to decode the message).

@@ -15,7 +15,7 @@ SickLDMRSROS::SickLDMRSROS()
 
 SickLDMRSROS::~SickLDMRSROS()
 {
-	
+
 }
 
 void SickLDMRSROS::initLut(){
@@ -44,7 +44,6 @@ void SickLDMRSROS::makePointCloud(MessageScanData &data)
 
     cloud.height = 1;
     cloud.width = numPoints;
-//    qDebug() << numPoints;
 
     for(int i=0; i<numPoints; i++)
     {
@@ -69,4 +68,4 @@ void SickLDMRSROS::publishData(MessageScanData &data)
 }
 
 
-}
+}  

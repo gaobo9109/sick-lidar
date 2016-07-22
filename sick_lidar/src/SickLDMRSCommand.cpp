@@ -23,7 +23,7 @@ namespace sick_lidar
         DataHeader header = {MAGICWORD,0,COMMAND_GET_PARAM_LENGTH,0,0,SICKLDMRS_COMMAND_TYPE,0};
         GetParamCommand cmd = {commandID,0,commandIndex};
 
-        char *buffer = new char[sizeof(DataHeader)+sizeof(GetParamCommand)];
+        char buffer[sizeof(DataHeader)+sizeof(GetParamCommand)];
         std::memcpy(buffer, &header, sizeof(DataHeader));
         std::memcpy(buffer+sizeof(DataHeader), &cmd, sizeof(GetParamCommand));
         return QByteArray(buffer,sizeof(buffer));
@@ -34,7 +34,7 @@ namespace sick_lidar
         DataHeader header = {MAGICWORD,0,COMMAND_SET_PARAM_LENGTH,0,0,SICKLDMRS_COMMAND_TYPE,0};
         SetParamCommand cmd = {commandID,0,commandIndex,commandParam};
 
-        char *buffer = new char[sizeof(DataHeader)+sizeof(SetParamCommand)];
+        char buffer[sizeof(DataHeader)+sizeof(SetParamCommand)];
         std::memcpy(buffer, &header, sizeof(DataHeader));
         std::memcpy(buffer+sizeof(DataHeader), &cmd, sizeof(SetParamCommand));
         return QByteArray(buffer,sizeof(buffer));
