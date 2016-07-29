@@ -98,15 +98,14 @@ struct ScanHeader {
 
 
 struct ScanPoint{
-    uint8_t layerEcho;           //!< 4 LSB : Layer (scan layer of the point)
-                                //!< 4 MSB : Echo
+    uint8_t layer;           //!< 4 LSB : Layer (scan layer of the point)
+    uint8_t echo;            //!< 4 MSB : Echo
     uint8_t flags;
-    uint16_t angle;            //!< Angle in number of ticks. You can easily compute the real angle :
+    int16_t angle;            //!< Angle in number of ticks. You can easily compute the real angle :
                                 //!< \f$ angle (degree) = \frac{angle (ticks)}{ScanHeader.ticksPerRot}\f$ @see ScanHeader
 
     uint16_t distance;         //!< Distance of the point from the sensor in centimeters.
     uint16_t echoPulseWidth;   //!< Width of echo pulse (cm)
-    uint16_t reserved;
 };
 
 

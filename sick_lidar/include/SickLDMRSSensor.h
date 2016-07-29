@@ -16,13 +16,12 @@
 
 #include "SickLDMRSData.h"
 #include "SickSocket.h"
-#include <QThread>
 #include <string>
 #include <ros/ros.h>
 
 
-#define BODY_MAX_SIZE   10000
-#define POINTS_MAX_SIZE 1000
+#define BODY_MAX_SIZE   20000
+#define POINTS_MAX_SIZE 2000
 
 class QEvent;
 
@@ -32,7 +31,7 @@ namespace sick_lidar {
 class SickLDMRSROS;
 
 struct MessagePacket {
-    uint32_t time;
+    ros::Time time;
     std::string data;
     bool previousData;
 };
@@ -46,7 +45,7 @@ public:
 
     uint16_t msgType;
     char body[BODY_MAX_SIZE];
-    uint32_t time;
+    ros::Time time;
 
 };
 
@@ -58,7 +57,7 @@ public:
 
     ScanHeader header;
     ScanPoint scanPoints[POINTS_MAX_SIZE];
-    uint32_t time;
+    ros::Time time;
 
 };
 
@@ -92,9 +91,9 @@ private:
     std::list<MessageLDMRS> msgList;
     MessagePacket pendingBytes;
 
-    void storePendingBytes(uint32_t time);
+    void storePendingBytes(ros::Time time);
     void fillScanHeader(MessageLDMRS& msg, MessageScanData& scan);
-    void splitPacket(const char * packet, const int length, uint32_t time);
+    void splitPacket(const char * packet, const int length, ros::Time time);
     void handleScanMessage(MessageLDMRS &msg);
     void processMessage(MessageLDMRS & msg);
     int32_t findMagicWord(const char * message, const unsigned length);

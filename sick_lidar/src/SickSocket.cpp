@@ -69,7 +69,7 @@ void SickSocket::socketConnectionClosed()
 void SickSocket::socketReadyRead()
 {   
   SickFrame * frame = new SickFrame();
-  frame->time = ros::Time::now().toSec();
+  frame->time = ros::Time::now();
   frame->size = socket->bytesAvailable(); 
   frame->msg = new char[frame->size]; 
 

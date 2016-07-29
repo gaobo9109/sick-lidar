@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(sick_lidar)
 
-
 find_package(Qt4 REQUIRED)
 
 if(QT4_FOUND)
