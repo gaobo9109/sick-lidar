@@ -232,7 +232,11 @@ void SickLDMRSSensor::handleScanMessage(MessageLDMRS &msg)
         return;
     }
 
-    int count = 0;
+    int layer1 = 0;
+    int layer2 = 0;
+    int layer3 = 0;
+    int layer4 = 0;
+
     for(int i=0; i<numPoints; i++){
 
         uint8_t layerEcho = *((uint8_t*)(msg.body + i*pointSize + offset));
@@ -243,18 +247,17 @@ void SickLDMRSSensor::handleScanMessage(MessageLDMRS &msg)
         scan.scanPoints[i].distance = *((uint16_t*)(msg.body + i*pointSize + offset + 4));
         scan.scanPoints[i].echoPulseWidth = *((uint16_t*)(msg.body + i*pointSize + offset + 6));
 
-        if((scan.scanPoints[i].distance) < 10)
-        {
-            count++;
-            std::cout << scan.scanPoints[i].layer << std::endl;
-            std::cout << scan.scanPoints[i].echo << std::endl;
-            std::cout << scan.scanPoints[i].distance << std::endl;
-            std::cout << scan.scanPoints[i].angle << std::endl;
-        }
-
+        if(scan.scanPoints[i].layer==0) layer1++;
+        else if(scan.scanPoints[i].layer==1) layer2++;
+        else if(scan.scanPoints[i].layer==2) layer3++;
+        else layer4++;
 
     }
-    std::cout << "count: " << count << " total: " << numPoints << std::endl;
+    std::cout << "layer1: " << layer1 << std::endl;
+    std::cout << "layer2: " << layer2 << std::endl;
+    std::cout << "layer3: " << layer3 << std::endl;
+    std::cout << "layer4: " << layer4 << std::endl;
+    std::cout << " " << std::endl;
     rosHandler->processData(scan);
 
 }
