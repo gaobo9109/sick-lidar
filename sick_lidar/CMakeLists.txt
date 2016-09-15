@@ -11,10 +11,7 @@ else()
   message(ERROR "Qt4 needed")
 endif()
 
-find_package(PCL 1.3 REQUIRED COMPONENTS
-  common
-  io
-)
+find_package(PCL 1.3 REQUIRED COMPONENTS)
 
 find_package(catkin REQUIRED COMPONENTS
   message_generation
@@ -81,4 +78,9 @@ target_link_libraries(driver
     ${QT_LIBRARIES}
     ${catkin_LIBRARIES}
 )
+
+add_executable(pcl_cluster src/pcl_clustering.cpp)
+target_link_libraries(pcl_cluster 
+    ${catkin_LIBRARIES}    
+    ${PCL_LIBRARIES})
 
