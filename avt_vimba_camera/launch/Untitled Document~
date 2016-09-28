@@ -1,0 +1,6 @@
+<launch>
+	<node name="stereo_image_proc" pkg="stereo_image_proc" type="stereo_image_proc">
+			<param name="approximate_sync" value="True"/>
+			<param name="correction_window_size" value="20"/>
+	</node>
+</launch>
